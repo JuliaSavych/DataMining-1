@@ -20,20 +20,20 @@ class RandomClassifier:
 class SingleByteClassifier:
   def __init__(self, numberOfClasses, byteIndex):
     self.byteIndex = byteIndex
-    self.classesByFirstPixel = []
-    for pixelValue in range(256):
-      self.classesByFirstPixel.append([])
+    self.classesByByteValue = []
+    for byteValue in range(256):
+      self.classesByByteValue.append([])
       for classI in range(numberOfClasses):
-        self.classesByFirstPixel[pixelValue].append(0)
+        self.classesByByteValue[byteValue].append(0)
 
   def train(self, batch_data, batch_labels):
     for i in range(len(batch_data)):
       data = batch_data[i]
       label = batch_labels[i]
-      self.classesByFirstPixel[data[self.byteIndex]][label] += 1
+      self.classesByByteValue[data[self.byteIndex]][label] += 1
 
   def classify(self, batch_data):
     classifications = []
     for item in batch_data:
-      classifications.append(argmax(self.classesByFirstPixel[item[self.byteIndex]]))
+      classifications.append(argmax(self.classesByByteValue[item[self.byteIndex]]))
     return classifications
