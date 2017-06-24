@@ -2,8 +2,10 @@ import pickle
 import numpy as np
 from matplotlib import pyplot
 import random
+from simple_classifiers import RandomClassifier, SingleByteClassifier
 
 IMAGE_SIDE_SIZE = 32
+BATCH_FILENAMES = ['data_batch_1', 'data_batch_2', 'data_batch_3', 'data_batch_4', 'data_batch_5']
 
 def readFile(file):
   with open(file, 'rb') as fo:
@@ -21,27 +23,52 @@ def cifarImageToRGBMatrix(row):
 
 # RGBMatrix is NxMx3 or NxMx4 with uint8 or float 0..1 values
 def showImage(RGBMatrix, label = 'Unknown'):
-  # each image pixel will be displayed by a 2x2 square
-  ax = pyplot.figure(figsize = (2,2))
+  ax = pyplot.figure(figsize = (1.5,1.5))
   pyplot.imshow(RGBMatrix)
-  ax.suptitle('Class: ' + label)
+  ax.suptitle(label)
   pyplot.show()
 
-if __name__ == "__main__":
-  print('Reading CIFAR-10 data batch 1')
+def trainAndClassify(batches, test_batch, classifier):
+  for batch in batches:
+    classifier.train(batch[b'data'], batch[b'labels'])
+  return classifier.classify(test_batch[b'data'])
 
-  batch1 = readFile('./cifar-10/data_batch_1')
-  batch_meta = readFile('./cifar-10/batches.meta')
+def calculateAccuracy(results, test_batch):
+  correct = 0
+  for i, res in enumerate(results):
+    if res == test_batch[b'labels'][i]:
+      correct += 1
+  return (correct / len(test_batch[b'labels']))
 
-  label_names = batch_meta[b'label_names']
-
-  # some random image to display
-  imageI = random.randint(0, 9999)
-
-  image = batch1[b'data'][imageI]
+def showRandomImage(batch_data, batch_labels, label_names):
+  imageI = random.randint(0, len(batch_data) - 1)
+  image = batch_data[imageI]
   imageMatrix = cifarImageToRGBMatrix(image)
-  imageLabel = batch1[b'labels'][imageI]
+  imageLabel = batch_labels[imageI]
   imageHumanLabel = label_names[imageLabel].decode("utf-8")
-
-  print('Displaying image index: ', imageI)
+  print('\nDisplaying random image index: ', imageI)
   showImage(imageMatrix, imageHumanLabel)
+
+if __name__ == "__main__":
+  batches = []
+
+  for batchFilename in BATCH_FILENAMES:
+    print('Reading file ' + batchFilename)
+    batch = readFile('./cifar-10/' + batchFilename)
+    batches.append(batch)
+
+  test_batch = readFile('./cifar-10/test_batch')
+
+  resultsRandom = trainAndClassify(batches, test_batch, RandomClassifier(10))
+  accuracyRandom = calculateAccuracy(resultsRandom, test_batch)
+  print('\nAccuracy of random classifier: ' + str(accuracyRandom))
+
+  for i in range(25):
+    resultsSingleByte = trainAndClassify(batches, test_batch, SingleByteClassifier(10, i))
+    accuracySingleByte = calculateAccuracy(resultsSingleByte, test_batch)
+    print('Accuracy of single byte classifier for byte ' + str(i) + ': ' + str(accuracySingleByte))
+
+  batch_meta = readFile('./cifar-10/batches.meta')
+  label_names = batch_meta[b'label_names']
+  # some random image to display
+  showRandomImage(batches[0][b'data'], batches[0][b'labels'], label_names)
