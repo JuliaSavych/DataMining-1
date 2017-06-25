@@ -1,0 +1,7 @@
+*.tag*
+*.pyc
+.DS_Store
+.idea
+__pycache__
+cifar-10
+models

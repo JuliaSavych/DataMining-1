@@ -1,0 +1,13 @@
+- Install TensorFlow: https://www.tensorflow.org/install/
+    - I did the Windows Conda CPU only variant, but slim lib seems to need GPU
+- Install TF-slim and TF-slim image models: https://github.com/tensorflow/models/tree/master/slim
+- cd `models/slim` (or wherever you download the TF-slim image models)
+- Download and convert the cifar10 dataset in the format for slim lib
+    - `python download_and_convert_data.py --dataset_name=cifar10 --dataset_dir="../../cifar-10"`
+    - dataset_dir is where to download the dataset
+- Fine-tuning a checkpoint of MobileNet_v1_0.25_128 originally trained on the ILSVRC-2012-CLS dataset
+    - Only training the last layers
+    - `python train_image_classifier.py --train_dir="../../train" --dataset_dir="../../cifar-10" --dataset_name=cifar10 --dataset_split_name=train --model_name=mobilenet_v1 --checkpoint_path="../../checkpoints/mobilenet_v1_0.25_128.ckpt" --checkpoint_exclude_scopes=MobilenetV1/Logits,MobilenetV1/Predictions --trainable_scopes=MobilenetV1/Logits,MobilenetV1/Predictions`
+- Evaluate performance on the newly trained model over cifar10
+    - Replace NEWFILE below with the output of the previous step
+    - `python eval_image_classifier.py --alsologtostderr --checkpoint_path="../../checkpoints/<NEWFILE>" --dataset_dir="../../cifar-10" --dataset_name=cifar10 --dataset_split_name=test --model_name=mobilenet_v1`
