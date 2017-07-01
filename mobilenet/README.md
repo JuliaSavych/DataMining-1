@@ -5,14 +5,12 @@
 - Download and convert the cifar10 dataset in the format for slim lib
     - `python download_and_convert_data.py --dataset_name=cifar10 --dataset_dir="../../cifar-10"`
     - dataset_dir is where to download the dataset
-- Train a MobileNet_v1_0.25_128 model on the cifar10 dataset:
+- Train a MobileNet_v1 model on the cifar10 dataset:
     - `python train_image_classifier.py --train_dir="../../train" --dataset_dir="../../cifar-10" --dataset_name=cifar10 --dataset_split_name=train --model_name=mobilenet_v1`
+    - If running CPU only - add `--clone_on_cpu=True`
+    - If out of ram - add `--batch_size=X` where X < 32
+    - You can also modify the `depth_multiplier` on line 269 in `models/slim/nets/mobile_v1.py` to e.g. 0.25 for a smaller network
 - Evaluate performance on the newly trained model over cifar10
-    - Replace NEWFILE below with the output of the previous step
-    - `python eval_image_classifier.py --alsologtostderr --checkpoint_path="../../checkpoints/<NEWFILE>" --dataset_dir="../../cifar-10" --dataset_name=cifar10 --dataset_split_name=test --model_name=mobilenet_v1`
+    - `python eval_image_classifier.py --alsologtostderr --checkpoint_path="../../train/" --dataset_dir="../../cifar-10" --dataset_name=cifar10 --dataset_split_name=test --model_name=mobilenet_v1`
 
-----
-Not working currently, more layers form the checkpoint should be skipped because of the different size:
-- Fine-tuning a checkpoint of MobileNet_v1_0.25_128 originally trained on the ILSVRC-2012-CLS dataset
-    - Only training the last layers
-    - `python train_image_classifier.py --train_dir="../../train" --dataset_dir="../../cifar-10" --dataset_name=cifar10 --dataset_split_name=train --model_name=mobilenet_v1 --checkpoint_path="../../checkpoints/mobilenet_v1_0.25_128.ckpt" --checkpoint_exclude_scopes=MobilenetV1/Logits,MobilenetV1/Predictions --trainable_scopes=MobilenetV1/Logits,MobilenetV1/Predictions`
+
