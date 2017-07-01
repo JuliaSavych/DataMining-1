@@ -17,6 +17,17 @@ class RandomClassifier:
     return classifications
 
 
+class ConstClassifier:
+  def __init__(self, constValue):
+    self.constValue = constValue
+
+  def train(self, batch_data, batch_labels):
+    return
+
+  def classify(self, batch_data):
+    return [self.constValue] * len(batch_data)
+
+
 class SingleByteClassifier:
   def __init__(self, numberOfClasses, byteIndex):
     self.byteIndex = byteIndex
@@ -33,7 +44,11 @@ class SingleByteClassifier:
       self.classesByByteValue[data[self.byteIndex]][label] += 1
 
   def classify(self, batch_data):
+    bestClassesByByteValue = []
+    for byteValue in range(256):
+      bestClassesByByteValue.append(argmax(self.classesByByteValue[byteValue]))
+
     classifications = []
     for item in batch_data:
-      classifications.append(argmax(self.classesByByteValue[item[self.byteIndex]]))
+      classifications.append(bestClassesByByteValue[item[self.byteIndex]])
     return classifications
